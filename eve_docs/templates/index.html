@@ -11,10 +11,11 @@
 <div class="container">
     <div class="api">
         <h1>{{ cfg['api_name'] }}</h1>
-        <p class="lead"><a href="http://{{ cfg['server_name'] }}"><code>@{{ cfg['server_name'] }}</code></a></p>
+        <p class="lead">The resources are described with a JSON-Schema that is also used for data validation. Please find additional information in the <a href="https://cerberus.readthedocs.org/en/latest/#validation-schema">Cerberus Documentation</a>.</p> 
+        <!--p class="lead"><a href="http://{{ cfg['server_name'] }}"><code>@{{ cfg['server_name'] }}</code></a></p-->
         <div class="panel-group">
-        {% for domain, paths  in cfg['domains']|dictsort %}
-            {{ accordian(domain, paths) }}
+        {% for domain, definition  in cfg['domains']|dictsort %}
+            {{ accordian(domain, definition) }}
         {% endfor %}
         </div>
     </div>
