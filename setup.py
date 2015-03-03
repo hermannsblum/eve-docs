@@ -5,9 +5,9 @@ LONG_DESCRIPTION = open('README.rst').read()
 
 setup(
     name='Eve-docs',
-    version='0.1.4',
-    url='https://github.com/charlesflynn/eve-docs',
-    author='Charles Flynn',
+    version='0.1.4.1',
+    url='https://github.com/hermannsblum/eve-docs',
+    author='Charles Flynn, Hermann Blum',
     author_email='git@irab.org',
     description='Generates documentation for Eve APIs',
     long_description=LONG_DESCRIPTION,
@@ -17,7 +17,7 @@ setup(
     include_package_data=True,
     platforms='any',
     install_requires=[
-        'Eve>=0.1',
+        'Eve>=0.4',
         'Flask>=0.10',
         'Flask-Bootstrap>=3.0',
     ],
