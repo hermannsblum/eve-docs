@@ -17,7 +17,7 @@ setup(
     include_package_data=True,
     platforms='any',
     install_requires=[
-        'Eve>=0.5.dev0',
+        # 'Eve>=0.5.dev0',
         'Flask>=0.10',
         'Flask-Bootstrap>=3.0',
     ],
