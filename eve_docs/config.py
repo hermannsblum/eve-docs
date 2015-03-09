@@ -2,6 +2,7 @@ from flask import current_app as capp
 from eve.utils import home_link
 from .labels import LABELS
 import re
+from pprint import pprint
 
 
 def get_cfg():
@@ -13,16 +14,50 @@ def get_cfg():
         base = '{0}://{1}'.format(protocol, base)
 
     cfg['base'] = base
-    cfg['domains'] = {}
     cfg['server_name'] = capp.config['SERVER_NAME']
     cfg['api_name'] = capp.config.get('API_NAME', 'API')
+    cfg['domains'] = parse_map(capp.url_map, capp.config)
+    for domain in cfg['domains'].keys():
+        cfg['domains'][domain]['description'] = \
+            capp.config['BLUEPRINT_DOCUMENTATION'].get(domain, {})
+    doku = {}
     for domain, resource in list(capp.config['DOMAIN'].items()):
-        if resource['item_methods'] or resource['resource_methods']:
+        if (resource['item_methods'] or resource['resource_methods']) \
+                and not resource['internal_resource']:
             # hide the shadow collection for document versioning
             if 'VERSIONS' not in capp.config or not \
                     domain.endswith(capp.config['VERSIONS']):
-                cfg['domains'][domain] = endpoint_definition(domain, resource)
+                doku[domain] = endpoint_definition(domain, resource)
+    cfg['domains'].update(doku)
+    pprint(capp.config['BLUEPRINT_DOCUMENTATION'])
+    pprint(capp.config['DOMAIN']['_eventsignups']['schema'])
+    # pprint(cfg['domains'])
     return cfg
+
+
+def parse_map(url_map, config):
+    ret = {}
+    print url_map
+    for rule in url_map.iter_rules():
+        help = str(rule)
+        resource = help.split("/")[1]
+        path = re.sub(r'<(?:[^>]+:)?([^>]+)>', '{\\1}', help)
+        if resource not in ret:
+            ret[resource] = {'paths': {}, 'description': {}}
+        ret[resource]['paths'][path] = {}
+        for method in rule.methods:
+            if method in ['GET', 'POST', 'PATCH', 'PUT', 'DELETE']:
+                ret[resource]['paths'][path][method] = {}
+            doc = config['BLUEPRINT_DOCUMENTATION'].get(resource)
+            doc_schema = None
+            if doc is not None:
+                doc_schema = doc.get('schema')
+            if (method in ['POST', 'PATCH', 'PUT'])\
+                    and (doc_schema is not None):
+                print doc_schema
+                ret[resource]['paths'][path][method]['params'] = \
+                    schema(config['DOMAIN'][doc_schema])
+    return ret
 
 
 def identifier(resource):
@@ -94,6 +129,10 @@ def paths(domain, resource):
 
 
 def methods(domain, resource, pathtype, param=None):
+    """
+    :param domain:
+    :param pathtype: String from ('item', 'resource', ...)
+    """
     ret = {}
     if pathtype == 'additional_lookup':
         method = 'GET'
