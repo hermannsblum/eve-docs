@@ -16,10 +16,12 @@ def get_cfg():
     cfg['base'] = base
     cfg['server_name'] = capp.config['SERVER_NAME']
     cfg['api_name'] = capp.config.get('API_NAME', 'API')
-    cfg['domains'] = parse_map(capp.url_map, capp.config)
-    for domain in cfg['domains'].keys():
-        cfg['domains'][domain]['description'] = \
-            capp.config['BLUEPRINT_DOCUMENTATION'].get(domain, {})
+    cfg['domains'] = {}
+    if capp.config.get('BLUEPRINT_DOCUMENTATION') is not None:
+        cfg['domains'] = parse_map(capp.url_map, capp.config)
+        for domain in cfg['domains'].keys():
+            cfg['domains'][domain]['description'] = \
+                capp.config['BLUEPRINT_DOCUMENTATION'].get(domain, {})
     doku = {}
     for domain, resource in list(capp.config['DOMAIN'].items()):
         if (resource['item_methods'] or resource['resource_methods']) \
