@@ -31,9 +31,6 @@ def get_cfg():
                     domain.endswith(capp.config['VERSIONS']):
                 doku[domain] = endpoint_definition(domain, resource)
     cfg['domains'].update(doku)
-    pprint(capp.config['BLUEPRINT_DOCUMENTATION'])
-    pprint(capp.config['DOMAIN']['_eventsignups']['schema'])
-    # pprint(cfg['domains'])
     return cfg
 
 
