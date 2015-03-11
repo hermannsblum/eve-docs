@@ -36,7 +36,6 @@ def get_cfg():
 
 def parse_map(url_map, config):
     ret = {}
-    print url_map
     for rule in url_map.iter_rules():
         help = str(rule)
         resource = help.split("/")[1]
@@ -53,7 +52,6 @@ def parse_map(url_map, config):
                 doc_schema = doc.get('schema')
             if (method in ['POST', 'PATCH', 'PUT'])\
                     and (doc_schema is not None):
-                print doc_schema
                 ret[resource]['paths'][path][method]['params'] = \
                     schema(config['DOMAIN'][doc_schema])
     return ret
