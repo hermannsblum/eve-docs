@@ -32,11 +32,12 @@ def get_cfg():
     cfg['server_name'] = capp.config['SERVER_NAME']
     cfg['api_name'] = capp.config.get('API_NAME', 'API')
     cfg['domains'] = {}
+    # 1. get the registered url-rules
+    cfg['domains'] = parse_map(capp.url_map, capp.config)
+
+    # 2. add specific documentation from the blueprints
     if capp.config.get('BLUEPRINT_DOCUMENTATION') is not None:
-        cfg['domains'] = parse_map(capp.url_map, capp.config)
-        for domain in cfg['domains'].keys():
-            cfg['domains'][domain]['description'] = \
-                capp.config['BLUEPRINT_DOCUMENTATION'].get(domain, {})
+        cfg['domains'].update(blueprint_definition(capp.config))
     doku = {}
     for domain, resource in list(capp.config['DOMAIN'].items()):
         if (resource['item_methods'] or resource['resource_methods']) \
@@ -74,15 +75,30 @@ def parse_map(url_map, config):
                 # we only display these methods, other HTTP-Methods don't need
                 # documentation
                 ret[resource]['paths'][path][method] = {}
+    return ret
 
-            doc = config['BLUEPRINT_DOCUMENTATION'].get(resource)
-            doc_schema = None
-            if doc is not None:
-                doc_schema = doc.get('schema')
-            if (method in ['POST', 'PATCH', 'PUT'])\
-                    and (doc_schema is not None):
-                ret[resource]['paths'][path][method]['params'] = \
-                    schema(config['DOMAIN'][doc_schema])
+
+def blueprint_definition(config):
+    """
+    will provide an update on the documentation-dict domains based on the data
+    in BLUEPRINT_DOCUMENTATION and schemas in DOMAIN
+    :param config: the app.config dict
+    :returns: documentation of blueprints as a dict
+    """
+    ret = {}
+    for resource, doc in list(config['BLUEPRINT_DOCUMENTATION'].items()):
+        # it is possible to link a blueprint-description to a schema of an
+        # internal resource
+        doc_schema = doc.pop('schema', None)
+        # create a general description entry, add the documentation fields
+        ret[resource] = {'description': doc, 'paths': {}}
+        for path in config['DOMAIN'][resource]['paths']:
+            for method in config['DOMAIN'][resource]['paths'][path]:
+                if (method in ['POST', 'PATCH', 'PUT'])\
+                        and (doc_schema is not None):
+                    # load the schema of the internal resource
+                    ret[resource]['paths'][path][method]['params'] = \
+                        schema(config['DOMAIN'][doc_schema])
     return ret
 
 
@@ -142,7 +158,7 @@ def endpoint_definition(domain, resource):
     :returns: the documentation as a dict (paths, methods, fields)
     """
     ret = {}
-    ret['description'] = resource['description']
+    ret['description'] = resource.get('description', {})
     ret['paths'] = paths(domain, resource)
     return ret
 
