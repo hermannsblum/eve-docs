@@ -33,8 +33,8 @@ if os.environ.get('PORT'):
     SERVER_NAME = 'eve-demo.herokuapp.com'
 else:
     # Running on local machine. Let's just use the local mongod instance.
-    MONGO_HOST = 'localhost'
-    MONGO_PORT = 27017
+    MONGO_HOST = 'dbh46.mongolab.com'
+    MONGO_PORT = 27467
     MONGO_USERNAME = 'user'
     MONGO_PASSWORD = 'user'
     MONGO_DBNAME = 'apitest'
@@ -69,7 +69,7 @@ people = {
     # additional read-only entry point. This way consumers can also perform GET
     # requests at '/people/<lastname>/'.
     'additional_lookup': {
-        'url': '[\w]+',
+        'url': 'regex("[\w]+")',
         'field': 'lastname'
     },
 
@@ -106,14 +106,28 @@ people = {
         'born': {
             'type': 'datetime',
         },
+    },
+    # The key we defined for special documentaton
+    'description': {
+        'general': 'Represents people who work at the company.',
+        'methods': {
+            'DELETE': 'DELETE may need special authorization.'
+        },
+        'fields': {
+            'role': 'The role defines the place of this person within the '
+                    'company',
+            'location': 'A dict for the address of this person.',
+            'born': 'Is datetime object, but only the date information is '
+                    'relevant.'
+        }
     }
 }
 
 works = {
-    #'item_methods': ['GET'],
+    # 'item_methods': ['GET'],
     # if 'item_title' is not provided Eve will just strip the final
     # 's' from resource name, and use it as the item_title.
-    #'item_title': 'work',
+    # 'item_title': 'work',
 
     # We choose to override global cache-control directives for this resource.
     'cache_control': 'max-age=10,must-revalidate',
@@ -135,6 +149,7 @@ works = {
             # will default to `people._id` (or, more precisely, to whatever
             # ID_FIELD value is).
             'data_relation': {
+                'resource': 'people',
                 'collection': 'people'
             }
         },
