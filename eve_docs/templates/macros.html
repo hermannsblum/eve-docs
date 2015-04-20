@@ -8,7 +8,9 @@
     </div>
     <div id="collapse-{{ domain }}" class="panel-collapse collapse">
       <div class="panel-body">
-        {{ definition['description']['general'] }}
+        <div class="panel_description">
+          {{ definition['description']['general'] }}
+        </div>
         {% for path, method in definition['paths']|dictsort %}
           {% for method, attrs in method.items() %}
             {{ method_details(definition['description'], path, method, attrs) }}
@@ -38,9 +40,11 @@
   </a>
   {% if attrs.params or description.get('methods')[method]%}
   <div id="{{ pathid }}-{{ method }}" class="collapse">
-    <div class="method_description">
-      {{ description.get('methods')[method] }}
-    </div>
+    {% if 'methods' in description and method in description['methods'] %}
+      <div class="method_description">
+      {{ description['methods'].get(method) }}
+      </div>
+    {%- endif %}
     {% if attrs.params %}
       {{ params_table(attrs.params, description.get('fields')) }}
     {%- endif %}
