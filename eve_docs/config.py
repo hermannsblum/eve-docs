@@ -37,7 +37,7 @@ def get_cfg():
             # hide the shadow collection for document versioning
             if 'VERSIONS' not in capp.config or not \
                     domain.endswith(capp.config['VERSIONS']):
-                domains = endpoint_definition(domain, resource)
+                domains[domain] = endpoint_definition(domain, resource)
 
     cfg['domains'].update(domains)
     return cfg
@@ -59,14 +59,14 @@ def parse_map(url_map):
         path = re.sub(r'<(?:[^>]+:)?([^>]+)>', '{\\1}', line)
         if resource not in ret:
             # this is the first path of this resource, create dict-entry
-            ret[resource] = {}
+            ret[resource] = {'paths': {}, 'description': {}}
         # add path to dict
-        ret[resource][path] = {}
+        ret[resource]['paths'][path] = {}
         for method in rule.methods:
             if method in ['GET', 'POST', 'PATCH', 'PUT', 'DELETE']:
                 # we only display these methods, other HTTP-Methods don't need
                 # documentation
-                ret[resource][path][method] = {}
+                ret[resource]['paths'][path][method] = {}
     return ret
 
 
