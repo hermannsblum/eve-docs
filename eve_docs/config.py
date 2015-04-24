@@ -37,7 +37,8 @@ def get_cfg():
             # hide the shadow collection for document versioning
             if 'VERSIONS' not in capp.config or not \
                     domain.endswith(capp.config['VERSIONS']):
-                domains[domain] = paths(domain, resource)
+                cfg['domains'][domain] = endpoint_definition(domain, resource)
+
     cfg['domains'].update(domains)
     return cfg
 
